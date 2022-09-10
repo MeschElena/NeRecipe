@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/feedFragment">
+
+    <fragment
+        android:id="@+id/feedFragment"
+        android:name="ru.netology.nerecipe.FeedFragment"
+        android:label="fragment_feed"
+        tools:layout="@layout/fragment_feed" >
+        <action
+            android:id="@+id/action_feedFragment_to_newRecipeFragment"
+            app:destination="@id/newRecipeFragment" >
+            <argument
+                android:name="initialIdRecipe"
+                app:argType="long"
+                android:defaultValue="-1L" />
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/newRecipeFragment"
+        android:name="ru.netology.nerecipe.NewRecipeFragment"
+        android:label="fragment_new_recipe"
+        tools:layout="@layout/fragment_new_recipe">
+        <argument
+            android:name="initialIdRecipe"
+            app:argType="long"
+            android:defaultValue="-1L"/>
+        <action
+            android:id="@+id/action_newRecipeFragment_to_newStepFragment"
+            app:destination="@id/newStepFragment" >
+            <argument
+                android:name="initialIdStep"
+                app:argType="long"
+                android:defaultValue="-1L" />
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/newStepFragment"
+        android:name="ru.netology.nerecipe.NewStepFragment"
+        android:label="fragment_new_step"
+        tools:layout="@layout/fragment_new_step">
+        <argument
+            android:name="initialIdStep"
+            app:argType="long"
+            android:defaultValue="-1L"/>
+    </fragment>
+</navigation>

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">NeRecipe</string>
+    <string name="autor">Autor</string>
+    <string name="remove">Remove</string>
+    <string name="edit">Edit</string>
+    <string name="like">Like</string>
+    <string name="recipe_text">Recipe Text</string>
+    <string name="description_close_edit">Close</string>
+    <string name="add_step">Add step</string>
+    <string name="step_image">Add image</string>
+    <string name="save_recipe">Save recipe</string>
+    <string name="add_recipe">Add recipe</string>
+    <string name="add_step_image">Add step\'s image</string>
+    <string name="add_image_recipe">Add image in recipe</string>
+    <string name="addImage">Add image</string>
+</resources>
