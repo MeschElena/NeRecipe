@@ -55,17 +55,16 @@ class NewRecipeFragment : Fragment() {
                     recipeContent.setText(recipeEdit.content)
                     recipeImage.setImageURI(recipeEdit.image)
 
-                    val adapter = StepRecipeAdapter(viewModel)
-                    binding.stepsRecyclerView.adapter = adapter
-                    adapter.submitList(step)
+//                    val adapter = StepRecipeAdapter(viewModel)
+//                    binding.stepsRecyclerView.adapter = adapter
+//                    adapter.submitList(step)
                 }
             }
 
         val adapter = StepRecipeAdapter(viewModel)
         binding.stepsRecyclerView.adapter = adapter
         viewModel.dataStep.observe(viewLifecycleOwner) {steps ->
-       //     steps.filter{it.idRecipe == viewModel.idEditeRecipe.value!!}
-            adapter.submitList(steps.filter{it.idRecipe == viewModel.idEditeRecipe.value!!})
+//            adapter.submitList(steps.filter{it.idRecipe == viewModel.idEditeRecipe.value!!})
         }
 
         val spinnerAdapter: ArrayAdapter<String> =
