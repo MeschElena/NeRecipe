@@ -34,16 +34,32 @@ class NewRecipeFragment : Fragment() {
         }
     }
 
-    fun checkSaveRecipe() : Boolean {
+    private fun checkSaveRecipe() : Boolean {
         return viewModel.idEditeRecipe.value !== null
     }
+    private fun IdRecipeEdit() : Long {
+        return if (args.initialIdRecipe != -1L) {
+            viewModel.idEditeRecipe.value!!
+        } else {
+            args.initialIdRecipe
+        }
+    }
+
+    private fun setImageRecipe(imageUri: Uri){
+        viewModel.imageRecipe = imageUri
+    }
+
+    private fun getImageRecipe(): Uri {
+        return viewModel.imageRecipe
+    }
+
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = FragmentNewRecipeBinding.inflate(inflater, container, false).also { binding ->
 
-        var imageUri :Uri = Uri.parse("android.resource://ru.netology.nerecipe./drawable/pngwing.png")
             if (args.initialIdRecipe != -1L) {
                 val recipeEdit = viewModel.getRecipe(args.initialIdRecipe)
                 viewModel.idEditeRecipe.value = recipeEdit.id
@@ -54,16 +70,13 @@ class NewRecipeFragment : Fragment() {
                     category.text = recipeEdit.categoryRecipe
                     recipeContent.setText(recipeEdit.content)
                     recipeImage.setImageURI(recipeEdit.image)
-
-//                    val adapter = StepRecipeAdapter(viewModel)
-//                    binding.stepsRecyclerView.adapter = adapter
-//                    adapter.submitList(step)
                 }
             }
 
         val adapter = StepRecipeAdapter(viewModel)
         binding.stepsRecyclerView.adapter = adapter
-        viewModel.dataStep.observe(viewLifecycleOwner) {steps ->
+        viewModel.dataStep.observe(viewLifecycleOwner) {
+            adapter.submitList(viewModel.getStepsByRecipeId(IdRecipeEdit()))
 //            adapter.submitList(steps.filter{it.idRecipe == viewModel.idEditeRecipe.value!!})
         }
 
@@ -110,6 +123,7 @@ class NewRecipeFragment : Fragment() {
         val image = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
             Snackbar.make(binding.root, it.toString(), Snackbar.LENGTH_LONG).show()
             binding.recipeImage.setImageURI(it)
+            setImageRecipe(it!!)
         }
 
 
@@ -123,7 +137,7 @@ class NewRecipeFragment : Fragment() {
             } else {
                 val newRecipe = Recipe(
                     0L, binding.nameRecipe.text.toString(), binding.author.text.toString(),
-                    binding.recipeContent.text.toString(), binding.category.text.toString(), Uri.parse(binding.recipeImage.toString())
+                    binding.recipeContent.text.toString(), binding.category.text.toString(), getImageRecipe()
                 )
                 viewModel.onSaveButtonClicked(newRecipe)
                 viewModel.onAddClickedStep()
@@ -132,7 +146,7 @@ class NewRecipeFragment : Fragment() {
 
         binding.fabSave.setOnClickListener {
             val newRecipe = Recipe(0L, binding.nameRecipe.text.toString(), binding.author.text.toString(),
-                binding.recipeContent.text.toString(), binding.category.text.toString(), Uri.parse(binding.recipeImage.toString()))
+                binding.recipeContent.text.toString(), binding.category.text.toString(), getImageRecipe())
             viewModel.onSaveButtonClicked(newRecipe)
             viewModel.idEditeRecipe.value = null
             findNavController().navigateUp()

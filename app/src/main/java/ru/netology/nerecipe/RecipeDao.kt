@@ -11,7 +11,7 @@ interface RecipeDao {
     fun getAll(): LiveData<List<RecipeEntity>>
 
     @Insert
-    fun insert(recipe: RecipeEntity)
+    fun insert(recipe: RecipeEntity): Long
 
 
     @Query("UPDATE recipes SET name = :name, content = :content, author = :author, categoryRecipe = :categoryRecipe, image = :image WHERE id = :id")

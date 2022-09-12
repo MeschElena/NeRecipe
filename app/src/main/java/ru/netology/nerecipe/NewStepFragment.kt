@@ -1,5 +1,6 @@
 package ru.netology.nerecipe
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -19,6 +20,7 @@ class NewStepFragment: Fragment() {
         ownerProducer = ::requireParentFragment
     )
     private val argsStep by navArgs<NewStepFragmentArgs>()
+    private var imageUri : Uri = Uri.parse("android.resource://ru.netology.nerecipe./drawable/pngegg.png")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,6 +36,9 @@ class NewStepFragment: Fragment() {
         val image = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
             Snackbar.make(binding.root, it.toString(), Snackbar.LENGTH_LONG).show()
             binding.stepImageEdit.setImageURI(it)
+            if (it != null) {
+                imageUri = it
+            }
         }
         binding.fabAddImageStep.setOnClickListener{
             image.launch(arrayOf("image/jpeg" , "image/png"))
@@ -48,12 +53,11 @@ class NewStepFragment: Fragment() {
 
     private fun onOkButtonClicked(binding: FragmentNewStepBinding) {
         val text = binding.stepContentEdit.text
-        val image = binding.stepImageEdit
 
         if (!text.isNullOrBlank()) {
             val resultBundle = Bundle(2)
             resultBundle.putString(RESULT_KEY, text.toString())
-            resultBundle.putString(RESULT_KEY_IMG, image.toString())
+            resultBundle.putString(RESULT_KEY_IMG, imageUri.toString())
             setFragmentResult(REQUEST_KEY,resultBundle)
         }
         findNavController().navigateUp()//popBackStack()

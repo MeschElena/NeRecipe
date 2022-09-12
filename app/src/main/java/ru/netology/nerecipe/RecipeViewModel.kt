@@ -1,6 +1,7 @@
 package ru.netology.nerecipe
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 
@@ -19,6 +20,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     val data get() = repository.data
     val dataStep get() = repositoryStep.dataStep
     val categoryRecipe = arrayOf("Европейская", "Азиатская", "Паназиатская", "Восточная", "Американская", "Русская", "Среднеземноморская")
+    var imageRecipe : Uri = Uri.parse("android.resource://ru.netology.nerecipe./drawable/pngwing.png")
     val idEditeRecipe = MutableLiveData<Long?>(null)
     val currentRecipe = MutableLiveData<Recipe?>(null)
     val currentStep = MutableLiveData<Step?>(null)
@@ -44,9 +46,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
             categoryRecipe = recipe.categoryRecipe,
             image = recipe.image
         )
-        repository.save(recipeEdit)
+        idEditeRecipe.value = repository.save(recipeEdit)
         currentRecipe.value = null
-        idEditeRecipe.value = recipeEdit.id
     }
 
     override fun onFavouriteClicked(recipe: Recipe) = repository.favourite(recipe.id)
