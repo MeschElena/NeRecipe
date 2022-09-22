@@ -4,6 +4,7 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.room.Query
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application), RecipeIteractionListener, StepRecipeIteractionListener {
 
@@ -21,33 +22,35 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     val dataStep get() = repositoryStep.dataStep
     val categoryRecipe = arrayOf("Европейская", "Азиатская", "Паназиатская", "Восточная", "Американская", "Русская", "Среднеземноморская")
     var imageRecipe : Uri = Uri.parse("android.resource://ru.netology.nerecipe./drawable/pngwing.png")
-    val idEditeRecipe = MutableLiveData<Long?>(null)
+    var querySearch: String = ""
+    var idEditeRecipe : Long = -1L
     val currentRecipe = MutableLiveData<Recipe?>(null)
     val currentStep = MutableLiveData<Step?>(null)
     val navigateToRecipeScreenEven = SingleLiveEvent<Long>()
-//    val navigateToPostContentViewEven = SingleLiveEvent<String>()
     val navigateToStepScreenView = SingleLiveEvent<Long>()
 
+
+    fun getFavotites() = checkNotNull(repository.getAll().value).filter {it.favourite == true}
 
     fun onSaveButtonClicked(recipe: Recipe) {
         if (recipe.content.isBlank() || recipe.author.isBlank()
             || recipe.name.isBlank() || recipe.categoryRecipe.isBlank()) return
         val recipeEdit = currentRecipe.value?.copy(
-            content = recipe.content,
             name = recipe.name,
             author = recipe.author,
             categoryRecipe = recipe.categoryRecipe,
+            content = recipe.content,
             image = recipe.image
         ) ?: Recipe(
             id = RecipeRepository.NEW_RECIPE_ID,
-            content = recipe.content,
             name = recipe.name,
             author = recipe.author,
             categoryRecipe = recipe.categoryRecipe,
+            content = recipe.content,
             image = recipe.image
         )
-        idEditeRecipe.value = repository.save(recipeEdit)
-        currentRecipe.value = null
+        idEditeRecipe = repository.save(recipeEdit)
+        currentRecipe.value = recipeEdit.copy(id = idEditeRecipe)
     }
 
     override fun onFavouriteClicked(recipe: Recipe) = repository.favourite(recipe.id)
@@ -60,14 +63,16 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     }
 
     fun onAddClicked(){
-      //  navigateToRecipeScreenEven.call()
         navigateToRecipeScreenEven.value = -1L
     }
 
     fun getRecipe(recipeId:Long) = checkNotNull(repository.getAll().value).filter {it.id == recipeId}[0]
 
+    fun getRecipesByQuery(query: String) = checkNotNull(repository.getAll().value).filter {it.name.contains(query) }
+
+    fun getFavoritesByQuery(query: String) = checkNotNull(repository.getAll().value).filter { it.favourite }.filter {it.name.contains(query)}
+
     fun onAddClickedStep() {
-       // navigateToStepScreenView.call()
         navigateToStepScreenView.value = -1L
     }
 

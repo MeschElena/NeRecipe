@@ -1,5 +1,6 @@
 package ru.netology.nerecipe
 
+import android.net.Uri
 import androidx.core.net.toUri
 import androidx.room.TypeConverter
 import com.google.gson.Gson
@@ -7,20 +8,20 @@ import com.google.gson.reflect.TypeToken
 
 internal fun RecipeEntity.toModel() = Recipe(
     id = id,
-    author = author,
-    content = content,
     name = name,
+    author = author,
     categoryRecipe = categoryRecipe,
+    content = content,
     image = image.toUri(),
     favourite = favourite
 )
 
 internal fun Recipe.toEntity() = RecipeEntity(
     id = id,
-    author = author,
-    content = content,
     name = name,
+    author = author,
     categoryRecipe = categoryRecipe,
+    content = content,
     image = image.toString(),
     favourite = favourite
 )

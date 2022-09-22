@@ -14,8 +14,8 @@ interface RecipeDao {
     fun insert(recipe: RecipeEntity): Long
 
 
-    @Query("UPDATE recipes SET name = :name, content = :content, author = :author, categoryRecipe = :categoryRecipe, image = :image WHERE id = :id")
-    fun updateRecipeById(id: Long, name: String, author: String, content: String, categoryRecipe: String, image: String)
+    @Query("UPDATE recipes SET name = :name, author = :author, categoryRecipe = :categoryRecipe, content = :content,  image = :image WHERE id = :id")
+    fun updateRecipeById(id: Long, name: String, author: String, categoryRecipe: String, content: String, image: String)
 
 
     @Query("""
@@ -27,6 +27,7 @@ interface RecipeDao {
 
     @Query("DELETE FROM recipes WHERE id = :id")
     fun removeById(id: Long)
+
 
     @Query("SELECT * FROM steps ORDER BY idRecipe AND idStep DESC")
     fun getAllStep(): LiveData<List<StepEntity>>

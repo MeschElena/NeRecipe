@@ -1,11 +1,14 @@
 package ru.netology.nerecipe
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
@@ -27,19 +30,23 @@ class NewStepFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = FragmentNewStepBinding.inflate(inflater, container, false).also { binding ->
-        //  arguments?.textArg?.let (binding.edit::setText)
 
         binding.stepContentEdit.requestFocus()
         binding.stepContentEdit.setText(viewModel.currentStep.value?.content)
         binding.stepImageEdit.setImageURI(viewModel.currentStep.value?.image)
+        if (argsStep.initialIdStep != -1L) {
+            imageUri = viewModel.currentStep.value?.image!!
+        }
+
 
         val image = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
-            Snackbar.make(binding.root, it.toString(), Snackbar.LENGTH_LONG).show()
+          //  Snackbar.make(binding.root, it.toString(), Snackbar.LENGTH_LONG).show()
+            requireActivity().contentResolver.takePersistableUriPermission(requireNotNull(it), Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding.stepImageEdit.setImageURI(it)
-            if (it != null) {
-                imageUri = it
-            }
+            imageUri = it
+            Log.d("TAG", "imageUri = ${imageUri}")
         }
+
         binding.fabAddImageStep.setOnClickListener{
             image.launch(arrayOf("image/jpeg" , "image/png"))
         }
@@ -52,14 +59,24 @@ class NewStepFragment: Fragment() {
 
 
     private fun onOkButtonClicked(binding: FragmentNewStepBinding) {
-        val text = binding.stepContentEdit.text
 
-        if (!text.isNullOrBlank()) {
-            val resultBundle = Bundle(2)
-            resultBundle.putString(RESULT_KEY, text.toString())
-            resultBundle.putString(RESULT_KEY_IMG, imageUri.toString())
-            setFragmentResult(REQUEST_KEY,resultBundle)
+        val text = binding.stepContentEdit.text
+        if (argsStep.initialIdStep != -1L) {
+            val newStep =
+                Step(argsStep.initialIdStep, viewModel.idEditeRecipe, text.toString(), imageUri)
+            viewModel.onSaveStepButtonClicked(newStep)
+        } else {
+            val newStep =
+                Step(0L, viewModel.idEditeRecipe, text.toString(), imageUri)
+            viewModel.onSaveStepButtonClicked(newStep)
         }
+
+//        if (!text.isNullOrBlank()) {
+//            val resultBundle = Bundle(2)
+//            resultBundle.putString(RESULT_KEY, text.toString())
+//            resultBundle.putString(RESULT_KEY_IMG, imageUri.toString())
+//            setFragmentResult(REQUEST_KEY,resultBundle)
+//        }
         findNavController().navigateUp()//popBackStack()
     }
 

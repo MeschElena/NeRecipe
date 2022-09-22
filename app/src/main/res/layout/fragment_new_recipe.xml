@@ -73,11 +73,11 @@
         app:layout_constraintTop_toBottomOf="@id/headerBarrier"
         app:layout_constraintBottom_toTopOf="@id/recipe_content">
 
-    <ImageView
-        android:id="@+id/recipe_image"
-        android:layout_width="400dp"
-        android:layout_height="200dp"
-        app:srcCompat="@drawable/pngwing" />
+        <ImageView
+            android:id="@+id/recipe_image"
+            android:layout_width="400dp"
+            android:layout_height="200dp"
+            app:srcCompat="@drawable/pngwing" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_image"
@@ -91,17 +91,18 @@
         app:srcCompat="@drawable/ic_add_24dp" />
     </RelativeLayout>
 
+
     <EditText
         android:id="@+id/recipe_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:autoLink="web"
         android:ellipsize="end"
         app:layout_constraintBottom_toTopOf="@id/bottomBarrier"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/relativeLayout"
         tools:text="Описание рецепта" />
-
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/bottomBarrier"
@@ -118,7 +119,7 @@
         android:layout_height="0dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/bottomBarrier"
-
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="16dp"
         tools:listitem="@layout/step_list_item" />
 

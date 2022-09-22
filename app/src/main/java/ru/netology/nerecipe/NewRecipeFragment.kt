@@ -3,6 +3,7 @@ package ru.netology.nerecipe
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,18 +29,12 @@ class NewRecipeFragment : Fragment() {
     )
     private val args by navArgs<NewRecipeFragmentArgs>()
 
-    private val steps: MutableLiveData<List<Step>> by lazy {
-        MutableLiveData<List<Step>>().apply {
-            value = emptyList()
-        }
-    }
-
     private fun checkSaveRecipe() : Boolean {
-        return viewModel.idEditeRecipe.value !== null
+        return viewModel.idEditeRecipe != -1L
     }
     private fun IdRecipeEdit() : Long {
-        return if (args.initialIdRecipe != -1L) {
-            viewModel.idEditeRecipe.value!!
+        return if (viewModel.idEditeRecipe != -1L) {
+            viewModel.idEditeRecipe
         } else {
             args.initialIdRecipe
         }
@@ -59,25 +54,37 @@ class NewRecipeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = FragmentNewRecipeBinding.inflate(inflater, container, false).also { binding ->
-
-            if (args.initialIdRecipe != -1L) {
-                val recipeEdit = viewModel.getRecipe(args.initialIdRecipe)
-                viewModel.idEditeRecipe.value = recipeEdit.id
-                val step = viewModel.getStepsByRecipeId(recipeEdit.id)
-                with(binding) {
-                    author.setText(recipeEdit.author)
-                    nameRecipe.setText(recipeEdit.name)
-                    category.text = recipeEdit.categoryRecipe
-                    recipeContent.setText(recipeEdit.content)
-                    recipeImage.setImageURI(recipeEdit.image)
+        viewModel.data.observe(viewLifecycleOwner) {
+            if (args.initialIdRecipe != -1L || IdRecipeEdit() != -1L) {
+                if (args.initialIdRecipe != -1L) {
+                    val recipeEdit = viewModel.getRecipe(args.initialIdRecipe)
+                    viewModel.idEditeRecipe = recipeEdit.id
+                    viewModel.imageRecipe = recipeEdit.image
+                    with(binding) {
+                        author.setText(recipeEdit.author)
+                        nameRecipe.setText(recipeEdit.name)
+                        category.text = recipeEdit.categoryRecipe
+                        recipeContent.setText(recipeEdit.content)
+                        recipeImage.setImageURI(recipeEdit.image)
+                    }
+               }
+                else {
+                    val recipeEdit = viewModel.currentRecipe.value!!
+                    with(binding) {
+                        author.setText(recipeEdit.author)
+                        nameRecipe.setText(recipeEdit.name)
+                        category.text = recipeEdit.categoryRecipe
+                        recipeContent.setText(recipeEdit.content)
+                        recipeImage.setImageURI(recipeEdit.image)
+                    }
                 }
             }
+        }
 
         val adapter = StepRecipeAdapter(viewModel)
         binding.stepsRecyclerView.adapter = adapter
         viewModel.dataStep.observe(viewLifecycleOwner) {
             adapter.submitList(viewModel.getStepsByRecipeId(IdRecipeEdit()))
-//            adapter.submitList(steps.filter{it.idRecipe == viewModel.idEditeRecipe.value!!})
         }
 
         val spinnerAdapter: ArrayAdapter<String> =
@@ -121,9 +128,10 @@ class NewRecipeFragment : Fragment() {
 
 
         val image = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
-            Snackbar.make(binding.root, it.toString(), Snackbar.LENGTH_LONG).show()
+            requireActivity().contentResolver.takePersistableUriPermission(requireNotNull(it), Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding.recipeImage.setImageURI(it)
-            setImageRecipe(it!!)
+            Log.d("TAG", "viewModel.imageRecipe = ${viewModel.imageRecipe}")
+            setImageRecipe(it)
         }
 
 
@@ -136,8 +144,12 @@ class NewRecipeFragment : Fragment() {
                 viewModel.onAddClickedStep()
             } else {
                 val newRecipe = Recipe(
-                    0L, binding.nameRecipe.text.toString(), binding.author.text.toString(),
-                    binding.recipeContent.text.toString(), binding.category.text.toString(), getImageRecipe()
+                    id = 0L,
+                    name = binding.nameRecipe.text.toString(),
+                    author = binding.author.text.toString(),
+                    categoryRecipe = binding.category.text.toString(),
+                    content = binding.recipeContent.text.toString(),
+                    image = getImageRecipe()
                 )
                 viewModel.onSaveButtonClicked(newRecipe)
                 viewModel.onAddClickedStep()
@@ -145,10 +157,29 @@ class NewRecipeFragment : Fragment() {
         }
 
         binding.fabSave.setOnClickListener {
-            val newRecipe = Recipe(0L, binding.nameRecipe.text.toString(), binding.author.text.toString(),
-                binding.recipeContent.text.toString(), binding.category.text.toString(), getImageRecipe())
-            viewModel.onSaveButtonClicked(newRecipe)
-            viewModel.idEditeRecipe.value = null
+            if (checkSaveRecipe()) {
+                val newRecipe = Recipe(
+                    id = IdRecipeEdit(),
+                    name = binding.nameRecipe.text.toString(),
+                    author = binding.author.text.toString(),
+                    content = binding.recipeContent.text.toString(),
+                    categoryRecipe = binding.category.text.toString(),
+                    image = getImageRecipe()
+                )
+                viewModel.onSaveButtonClicked(newRecipe)
+            } else {
+                val newRecipe = Recipe(
+                    0L,
+                    binding.nameRecipe.text.toString(),
+                    binding.author.text.toString(),
+                    binding.category.text.toString(),
+                    binding.recipeContent.text.toString(),
+                    getImageRecipe()
+                )
+                viewModel.onSaveButtonClicked(newRecipe)
+            }
+            viewModel.idEditeRecipe = -1L
+            viewModel.currentRecipe.value = null
             findNavController().navigateUp()
         }
 
@@ -157,16 +188,17 @@ class NewRecipeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setFragmentResultListener(
-            requestKey = NewStepFragment.REQUEST_KEY
-        ) {requestKey, bundle ->
-            if (requestKey != NewStepFragment.REQUEST_KEY) return@setFragmentResultListener
+//        setFragmentResultListener(
+//            requestKey = NewStepFragment.REQUEST_KEY
+//        ) {requestKey, bundle ->
+//            if (requestKey != NewStepFragment.REQUEST_KEY) return@setFragmentResultListener
+//
+//            val newStepContent = bundle.getString(NewStepFragment.RESULT_KEY) ?: return@setFragmentResultListener
+//            val newStepImage = bundle.getString(NewStepFragment.RESULT_KEY_IMG) ?: return@setFragmentResultListener
 
-            val newStepContent = bundle.getString(NewStepFragment.RESULT_KEY) ?: return@setFragmentResultListener
-            val newStepImage = bundle.getString(NewStepFragment.RESULT_KEY_IMG) ?: return@setFragmentResultListener
-            val newStep = Step(0L, viewModel.idEditeRecipe.value!!, newStepContent, newStepImage.toUri())
-            viewModel.onSaveStepButtonClicked(newStep)
-        }
+//            val newStep = Step(0L, viewModel.idEditeRecipe, newStepContent, newStepImage.toUri())
+//            viewModel.onSaveStepButtonClicked(newStep)
+//        }
 
         viewModel.navigateToStepScreenView.observe(this){initialIdStep ->
             val direction = NewRecipeFragmentDirections.actionNewRecipeFragmentToNewStepFragment(initialIdStep)

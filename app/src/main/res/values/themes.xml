@@ -18,4 +18,10 @@
         <item name="iconTint">@color/like_checkbox_tint</item>
         <item name="android:minWidth">@dimen/icon_size</item>
     </style>
+
+    <style name="Widget.AppTheme.AllFavoritesMenu" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/all_favorites_tint</item>
+        <item name="backgroundTint">@color/play_video</item>
+    </style>
+
 </resources>

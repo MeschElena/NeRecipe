@@ -13,10 +13,10 @@ class RecipeEntity (
     val name: String,
     @ColumnInfo(name = "author")
     val author: String,
-    @ColumnInfo(name = "content")
-    val content: String,
     @ColumnInfo(name = "categoryRecipe")
     val categoryRecipe: String,
+    @ColumnInfo(name = "content")
+    val content: String,
     @ColumnInfo(name = "favourite")
     val favourite: Boolean,
     @ColumnInfo(name = "image")
